@@ -13,7 +13,7 @@ async fn authUser(id: &str) -> String {
         result: false,
     };
 
+    
 
-
-    return serde_json::to_string(response).unwrap();
+    return serde_json::to_string(&response).unwrap();
 }
