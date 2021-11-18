@@ -7,6 +7,7 @@ use regex::Regex;
 
 mod service;
 mod controlleur;
+mod entity;
 
 fn key_finder(id: &str) -> Result<(), anyhow::Error> {
     let mut final_value: u32;
@@ -34,10 +35,10 @@ fn key_finder(id: &str) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
     let loader = rocket::build();
+    let loader = controlleur::authentification::load_road(loader);
     loader.launch().await
 }
 
