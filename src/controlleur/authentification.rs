@@ -1,13 +1,14 @@
 use crate::entity::authentification::AuthResponse;
 use crate::service::authentification::generate_id;
+use rocket::response::content;
 
 pub fn load_road(loader : rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
     return loader.mount("/client/cle/verification", routes![auth_user]);
 }
 
 
-#[get("/<id>")]
-async fn auth_user(id: &str) -> String {
+#[get("/<id>", format = "json")]
+async fn auth_user(id: &str) -> content::Json<String> {
     let mut response = AuthResponse {
         status: String::from(""),
         request: String::from(""),
@@ -28,5 +29,5 @@ async fn auth_user(id: &str) -> String {
         }
     }
 
-    return serde_json::to_string(&response).unwrap();
+    return content::Json(serde_json::to_string(&response).unwrap());
 }
