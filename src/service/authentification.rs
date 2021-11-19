@@ -2,15 +2,54 @@ use regex::Regex;
 
 const KEY_FORMAT_STRING: &str = r"[A-Z]{1}[0-9]{9}";
 const KEY_LEN: usize = 10;
-const MIN_VALUE: u32 = 10000000;
+const MIN_VALUE: u32 = 100000000;
 const MIN_KEY: char = 'Z';
 
-
-
-
-pub fn generate_id(id: &str) -> Result<String, anyhow::Error>{
-    let err = key_validation(&id);
-    let mut key = id;
+/// A function generating an ID by using a key.
+/// 
+/// The key given must be valid refering to key_validation() function
+/// and generate different ID under specific conditions.
+/// 
+/// An addition of all numbers in the key has been done
+/// if  result > 15, we redo the addition on the result
+/// until result < 15.
+/// 
+/// Then we do final_result+1 and compare it in the
+/// alpabet to get the letter equals to the result.
+/// 
+/// If the letter of the key is the same as the ID final,
+/// Result is Ok
+/// 
+/// # Exceptions
+/// If the key number is lower than the const MIN_VALUE (100000000):
+/// 
+/// Return the ID "Z"
+/// 
+/// # Examples
+/// ```
+/// J123456789 -> valid format 1x[A-Z] + 9x[0-9]
+/// 1+2+3+4+5+6+7+8+9 = 45 (45 > 15), 4+5 = 9 (9 < 15), 9+1 = 10 : J
+/// J = J : Valid result
+/// ```
+/// 
+/// Basic Usages:
+/// ```
+/// // Valid key format + result
+/// let valid_id = generate_id("J123456789")
+/// assert_eq!(generate_id("F850391564"), "F".to_string())
+/// 
+/// // Valid exception
+/// assert_eq!("Z010000000","Z".to_string())
+/// 
+/// // Valid key format but wrong result
+/// assert_eq!(generate_id("A123456789"), "The Key given is invalid".to_String())
+/// 
+/// // Invalid key
+/// assert_eq!(generate_id("j123456789"), "The key format is invalid".to_string())
+/// ```
+pub fn generate_id(key: &str) -> Result<String, anyhow::Error>{
+    let err = key_validation(&key);
+    let mut key = key;
     let mut sum_string : String;
 
     if err.is_err(){
@@ -60,36 +99,42 @@ fn make_sum(char_array: &Vec<char>) -> u32{
     return sum;
 }
 
-/// A function using Regex expression to check if the key is valid
+/// A function using Regex expression to check if the key is valid.
 /// 
-/// The "ID" given should be respect this format:
+/// The ID given should respect this format:
 /// - 1 capital letter followed by 9 numbers
-/// - The letter is in the range [A-Z]
-/// - The numbers are in the range [0-9]
+/// - The letter must be in the range "[A-Z]"
+/// - The numbers must be in the range "[0-9]"
 /// 
 /// Returning an empty String the key is valid
 /// 
 /// # Examples
+/// 
+/// Basic usage:
 /// ```
+/// // Valid formats
+/// let valid_key = "A123456789";
+/// assert_eq!(valid_key, "".to_string());
 /// assert_eq!(key_validation("Z000000000"), "".to_string());
-/// assert_eq!(key_validation("A123456789"), "".to_string());
+/// 
+/// // Invalid formats
 /// assert_eq!(key_validation("a123456789"), "The ID given is invalid".to_string());
-/// assert_eq!(key_validation("203950248U"), "The ID given is invalid".to_string())
-/// assert_eq!(key_validation("4444444444"), "The ID given is invalid".to_string())
-/// assert_eq!(key_validation("ZEOHZEGPGP"), "The ID given is invalid".to_string())
-/// assert_eq!(key_validation("2E3950W48U"), "The ID given is invalid".to_string())
+/// assert_eq!(key_validation("203950248U"), "The ID given is invalid".to_string());
+/// assert_eq!(key_validation("4444444444"), "The ID given is invalid".to_string());
+/// assert_eq!(key_validation("ZEOHZEGPGP"), "The ID given is invalid".to_string());
+/// assert_eq!(key_validation("2E3950W48U"), "The ID given is invalid".to_string());
 /// ```
-fn key_validation(id: &str) -> Result<(), anyhow::Error>{
+fn key_validation(key: &str) -> Result<(), anyhow::Error>{
     let mut res: bool = false;
-    let id_len: usize = id.len();
+    let key_len: usize = key.len();
     let key_format: Regex = Regex::new(KEY_FORMAT_STRING).unwrap();
     
-    if key_format.is_match(id) && id_len == KEY_LEN {
+    if key_format.is_match(key) && key_len == KEY_LEN {
         res = true;
     }
     
     match res {
-        false => return Err(anyhow::anyhow!("The ID given is invalid")),
+        false => return Err(anyhow::anyhow!("The key format is invalid")),
         true => return Ok(()),
     }
 }
@@ -110,14 +155,13 @@ mod test{
     }
     
     #[rustfmt::skip]
-    #[test_case("","The ID given is invalid".to_string())]
-    #[test_case("15148A6565","The ID given is invalid".to_string())]
-    #[test_case("a154789623","The ID given is invalid".to_string())]
-    #[test_case("Z010000000","".to_string())]
-    #[test_case("B897561789","".to_string())]
-    #[test_case("F487845617","".to_string())]
+    #[test_case("","The key format is invalid".to_string())]
+    #[test_case("15148A6565","The key format is invalid".to_string())]
+    #[test_case("a154789623","The key format is invalid".to_string())]
+    #[test_case("G487845617","".to_string())]
     #[test_case("A123456789","".to_string())]
-    
+    #[test_case("Z010000000","".to_string())]
+
     fn find_the_key(id: &str, expected: String) -> Result<(), anyhow::Error>{
         let the_key = key_validation(id);
         println!("{}", &id);
@@ -133,9 +177,12 @@ mod test{
     }
 
     #[rustfmt::skip]
-    #[test_case("Z010000000","Z".to_string())]
-    #[test_case("2222222222","The ID given is invalid".to_string())]
+    
     #[test_case("L985412360","L".to_string())]
+    #[test_case("Z010000000","Z".to_string())]
+    #[test_case("A123456789","The Key given is invalid".to_string())]
+    #[test_case("2222222222","The key format is invalid".to_string())]
+    
     fn test_generate_id(entry: &str, expected: String){
         let result = generate_id(&entry);
         match result {
