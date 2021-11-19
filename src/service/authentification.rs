@@ -22,7 +22,6 @@ pub fn generate_id(id: &str) -> Result<String, anyhow::Error>{
     let letter = key.chars().nth(0).unwrap();
     key = &key[1..key.len()];
     let mut char_array = Vec::new();
-    println!("{}", &key);
     let current_key: u32 = key.parse().unwrap();
 
     match current_key > MIN_VALUE{
@@ -73,8 +72,6 @@ fn key_validation(id: &str) -> Result<(), anyhow::Error>{
     if key_format.is_match(id) && id_len == KEY_LEN {
         res = true;
     }
-
-    println!("len : {}", &id_len);
     
     match res {
         false => return Err(anyhow::anyhow!("The ID given is invalid")),
