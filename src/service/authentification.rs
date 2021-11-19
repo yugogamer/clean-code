@@ -1,6 +1,5 @@
 use regex::Regex;
 
-
 const KEY_FORMAT_STRING: &str = r"[A-Z]{1}[0-9]{9}";
 const KEY_LEN: usize = 10;
 const MIN_VALUE: u32 = 10000000;
@@ -40,16 +39,14 @@ pub fn generate_id(id: &str) -> Result<String, anyhow::Error>{
             if ('A' as u32 +sum) == letter as u32 {
                 return Ok(letter.to_string());
             }
-        
-            return Err(anyhow::anyhow!("The Key given is invalid"));
         },
         false => {
             if letter == MIN_KEY{
                 return Ok(letter.to_string());
             }
-            return Err(anyhow::anyhow!("The Key given is invalid"));
         },
     }
+    return Err(anyhow::anyhow!("The Key given is invalid"));
 }
 
 
@@ -63,11 +60,29 @@ fn make_sum(char_array: &Vec<char>) -> u32{
     return sum;
 }
 
+/// A function using Regex expression to check if the key is valid
+/// 
+/// The "ID" given should be respect this format:
+/// - 1 capital letter followed by 9 numbers
+/// - The letter is in the range [A-Z]
+/// - The numbers are in the range [0-9]
+/// 
+/// Returning an empty String the key is valid
+/// 
+/// # Examples
+/// ```
+/// assert_eq!(key_validation("Z000000000"), "".to_string());
+/// assert_eq!(key_validation("A123456789"), "".to_string());
+/// assert_eq!(key_validation("a123456789"), "The ID given is invalid".to_string());
+/// assert_eq!(key_validation("203950248U"), "The ID given is invalid".to_string())
+/// assert_eq!(key_validation("4444444444"), "The ID given is invalid".to_string())
+/// assert_eq!(key_validation("ZEOHZEGPGP"), "The ID given is invalid".to_string())
+/// assert_eq!(key_validation("2E3950W48U"), "The ID given is invalid".to_string())
+/// ```
 fn key_validation(id: &str) -> Result<(), anyhow::Error>{
     let mut res: bool = false;
     let id_len: usize = id.len();
     let key_format: Regex = Regex::new(KEY_FORMAT_STRING).unwrap();
-    
     
     if key_format.is_match(id) && id_len == KEY_LEN {
         res = true;
@@ -78,10 +93,6 @@ fn key_validation(id: &str) -> Result<(), anyhow::Error>{
         true => return Ok(()),
     }
 }
-
-
-
-
 
 #[cfg(test)]
 mod test{
@@ -97,7 +108,6 @@ mod test{
         let result = make_sum(&char_array);
         assert_eq!(result.to_string(), expected);
     }
-    
     
     #[rustfmt::skip]
     #[test_case("","The ID given is invalid".to_string())]
