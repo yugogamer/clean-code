@@ -1,23 +1,28 @@
 use crate::entity::authentification::AuthResponse;
 use crate::service::authentification::generate_id;
-use rocket::response::content;
+use rocket::serde::{json::Json};
+use rocket_okapi::{openapi, openapi_get_routes};
+
 
 pub fn load_road(loader : rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
-    return loader.mount("/client/cle/verification", routes![auth_user]);
+    let settings = rocket_okapi::settings::OpenApiSettings::new();
+    return loader.mount("/client/cle/verification", openapi_get_routes![settings: auth_user]);
 }
 
-
-#[get("/<id>", format = "json")]
-async fn auth_user(id: &str) -> content::Json<String> {
+/// # Key to ID
+/// allow to get user ID with a key
+#[openapi]
+#[get("/<key>", format = "json")]
+async fn auth_user(key: &str) -> Json<AuthResponse> {
     let mut response = AuthResponse {
         status: String::from(""),
         request: String::from(""),
         result: false,
     };
 
-    let key = generate_id(id);
+    let id = generate_id(key);
 
-    match key{
+    match id{
         Ok(key) => {
             response.request = String::from(key);
             response.status = String::from("Succes");
@@ -29,5 +34,5 @@ async fn auth_user(id: &str) -> content::Json<String> {
         }
     }
 
-    return content::Json(serde_json::to_string(&response).unwrap());
+    return Json(response);
 }
