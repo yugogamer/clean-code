@@ -7,7 +7,7 @@ const ID_LEN: usize = 9;
 const MIN_VALUE: u32 = 100000000;
 const MIN_KEY: char = 'Z';
 
-/// A function generating an ID by using a key.
+/// A function verifie an ID by using a key.
 /// 
 /// The key given must be valid refering to key_validation() function
 /// and generate different ID under specific conditions.
@@ -79,6 +79,44 @@ pub fn verifie_id(key: &str) -> Result<String, anyhow::Error>{
     Err(anyhow::anyhow!("The Key given is invalid"))
 }
 
+/// A function verifie an ID by using a key.
+/// 
+/// The key given must be valid refering to key_validation() function
+/// and generate different ID under specific conditions.
+/// 
+/// An addition of all numbers in the key has been done
+/// if  result > 15, we redo the addition on the result
+/// until result < 15.
+/// 
+/// Then we do final_result+1 and compare it in the
+/// alpabet to get the letter equals to the result.
+/// 
+/// If the letter of the key is the same as the ID final,
+/// Result is Ok
+/// 
+/// # Exceptions
+/// If the key number is lower than the const MIN_VALUE (100000000):
+/// 
+/// Return the ID "Z"
+/// 
+/// # Examples
+/// ```
+/// 123456789 -> valid format 9x[0-9]
+/// 1+2+3+4+5+6+7+8+9 = 45 (45 > 15), 4+5 = 9 (9 < 15), 9+1 = 10
+/// ```
+/// 
+/// Basic Usages:
+/// ```
+/// // Valid key format + result
+/// let valid_id = generate_id("J123456789")
+/// assert_eq!(generate_id("850391564"), 'F')
+/// 
+/// // Valid
+/// assert_eq!("Z010000000","Z")
+/// 
+/// // Invalid key
+/// assert_eq!(generate_id("j123456789"), "The key format is invalid")
+/// ```
 pub fn generate_id(key: &str) -> Result<char, anyhow::Error>{
     let err = key_gen_validation(key);
     
@@ -95,6 +133,41 @@ pub fn generate_id(key: &str) -> Result<char, anyhow::Error>{
     }
 }
 
+/// A function generate an Key by using a id.
+/// 
+/// The key given must be valid refering to key_gen_validation() function
+/// and generate different ID under specific conditions.
+/// 
+/// An addition of all numbers in the key has been done
+/// if  result > 15, we redo the addition on the result
+/// until result < 15.
+/// 
+/// Then we do final_result+1 and return it
+/// 
+/// 
+/// # Exceptions
+/// If the id number is lower than the const MIN_VALUE (100000000):
+/// 
+/// Return the ID "Z"
+/// 
+/// # Examples
+/// ```
+/// 123456789 -> valid format 9x[0-9]
+/// 1+2+3+4+5+6+7+8+9 = 45 (45 > 15), 4+5 = 9 (9 < 15), 9+1 = 10
+/// ```
+/// 
+/// Basic Usages:
+/// ```
+/// // Valid key format + result
+/// let valid_id = generate_id("123456789")
+/// assert_eq!(generate_id("850391564"), 'F')
+/// 
+/// // Valid
+/// assert_eq!("010000000","Z")
+/// 
+/// // Invalid key
+/// assert_eq!(generate_id("j123456789"), "The key format is invalid")
+/// ```
 fn calculate_key(id : &str) -> char{
     let mut sum = 16;
     let mut id = id;
@@ -115,6 +188,7 @@ fn calculate_key(id : &str) -> char{
     return ('A' as u8 + sum as u8) as char;
 }
 
+//A simple function to make a sum from a char vec
 fn make_sum(char_array: &Vec<char>) -> u32{
     let mut sum : u32 = 0;
     for number in char_array{
@@ -165,6 +239,27 @@ fn key_validation(key: &str) -> Result<(), anyhow::Error>{
     }
 }
 
+/// A function using Regex expression to check if the id is valid.
+/// 
+/// The ID given should respect this format:
+/// - 9 numbers
+/// - The numbers must be in the range "[0-9]"
+/// 
+/// Returning an empty String the key is valid
+/// 
+/// # Examples
+/// 
+/// Basic usage:
+/// ```
+/// // Valid formats
+/// let valid_id = "123456789";
+/// assert_eq!(valid_key, "");
+/// assert_eq!(key_validation("000000000"), "");
+/// 
+/// // Invalid formats
+/// assert_eq!(key_validation("a123456789"), "The ID given is invalid"));
+/// assert_eq!(key_validation("950248U"), "The ID given is invalid");
+/// ```
 fn key_gen_validation(key: &str) -> Result<(), anyhow::Error>{
     let mut res: bool = false;
     let key_len: usize = key.len();
