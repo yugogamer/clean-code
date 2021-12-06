@@ -1,6 +1,9 @@
 # clean-code
 A very bad user verfication
 
+Disclaimer : 
+Travaille effectuer dans le cadre du cours de clean code. Merci de ne pas se servire de méthode d'autentification similaire pour des raison de sécurité.
+
 First you need to install rust.
 For this use : https://www.rust-lang.org/fr
 
