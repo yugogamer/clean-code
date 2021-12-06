@@ -21,4 +21,4 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: code quality
-      run: cargo clippy -- -D warnings
+      run: cargo clippy
