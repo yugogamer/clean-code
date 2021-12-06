@@ -41,3 +41,4 @@ We use Swagger with rocket_okapi for generate openapi file
 ```bash
     cargo doc
 ```
+You should see a doc folder in target
