@@ -14,7 +14,7 @@ async fn main() -> Result<(), rocket::Error> {
     let loader = loader.mount(
         "/doc/",
         make_swagger_ui(&SwaggerUIConfig {
-            url: "/client/cle/verification/openapi.json".to_owned(),
+            url: "/client/cle/openapi.json".to_owned(),
             ..Default::default()
         }),
     );
