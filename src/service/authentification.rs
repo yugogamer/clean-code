@@ -1,7 +1,9 @@
 use regex::Regex;
 
 const KEY_FORMAT_STRING: &str = r"[A-Z]{1}[0-9]{9}";
+const ID_FORMAT_STRING: &str = r"[0-9]{9}";
 const KEY_LEN: usize = 10;
+const ID_LEN: usize = 9;
 const MIN_VALUE: u32 = 100000000;
 const MIN_KEY: char = 'Z';
 
@@ -35,19 +37,19 @@ const MIN_KEY: char = 'Z';
 /// Basic Usages:
 /// ```
 /// // Valid key format + result
-/// let valid_id = generate_id("J123456789")
-/// assert_eq!(generate_id("F850391564"), "F")
+/// let valid_id = verifi_id("J123456789")
+/// assert_eq!(verifie_id("F850391564"), "F")
 /// 
 /// // Valid exception
 /// assert_eq!("Z010000000","Z")
 /// 
 /// // Valid key format but wrong result
-/// assert_eq!(generate_id("A123456789"), "The Key given is invalid")
+/// assert_eq!(verifie_id("A123456789"), "The Key given is invalid")
 /// 
 /// // Invalid key
-/// assert_eq!(generate_id("j123456789"), "The key format is invalid")
+/// assert_eq!(verifie_id("j123456789"), "The key format is invalid")
 /// ```
-pub fn generate_id(key: &str) -> Result<String, anyhow::Error>{
+pub fn verifie_id(key: &str) -> Result<String, anyhow::Error>{
     let err = key_validation(key);
     let mut key = key;
     let mut sum_string : String;
@@ -59,26 +61,13 @@ pub fn generate_id(key: &str) -> Result<String, anyhow::Error>{
             Err(e) => return Err(e),
         };
     
-    let mut sum = 16;
     let letter = key.chars().next().unwrap();
     key = &key[1..key.len()];
-    let mut char_array = Vec::new();
     let current_key: u32 = key.parse().unwrap();
 
     match current_key > MIN_VALUE{
         true => {
-            while sum > 15 {
-                for char in key.chars(){
-                    char_array.push(char);
-                }
-                
-                sum = make_sum(&char_array);
-                char_array.clear();
-                sum_string = sum.to_string();
-                key = sum_string.as_str();
-            }
-        
-            if ('A' as u32 +sum) == letter as u32 {
+            if calculate_key(key) == letter {
                 return Ok(letter.to_string());
             }
         },
@@ -91,6 +80,41 @@ pub fn generate_id(key: &str) -> Result<String, anyhow::Error>{
     Err(anyhow::anyhow!("The Key given is invalid"))
 }
 
+pub fn get_letter(key: &str) -> Result<char, anyhow::Error>{
+    let err = key_gen_validation(key);
+    
+    match err {
+        Ok(_) => {
+            let current_key: u32 = key.parse().unwrap();
+            if current_key > MIN_VALUE{
+                return Ok(calculate_key(key));   
+            }else {
+                return Ok('Z');
+            }
+        },
+        Err(err) => return Err(err),
+    }
+}
+
+fn calculate_key(id : &str) -> char{
+    let mut sum = 16;
+    let mut id = id;
+    let mut char_array = Vec::new();
+    let mut sum_string : String;
+
+    while sum > 15 {
+        for char in id.chars(){
+            char_array.push(char);
+        }
+        
+        sum = make_sum(&char_array);
+        char_array.clear();
+        sum_string = sum.to_string();
+        id = sum_string.as_str();
+    }
+
+    return ('A' as u8 + sum as u8) as char;
+}
 
 fn make_sum(char_array: &Vec<char>) -> u32{
     let mut sum : u32 = 0;
@@ -142,6 +166,21 @@ fn key_validation(key: &str) -> Result<(), anyhow::Error>{
     }
 }
 
+fn key_gen_validation(key: &str) -> Result<(), anyhow::Error>{
+    let mut res: bool = false;
+    let key_len: usize = key.len();
+    let key_format: Regex = Regex::new(ID_FORMAT_STRING).unwrap();
+    
+    if key_format.is_match(key) && key_len == ID_LEN {
+        res = true;
+    }
+    
+    match res {
+        false => Err(anyhow::anyhow!("The id format is invalid")),
+        true => Ok(()),
+    }
+}
+
 #[cfg(test)]
 mod test{
     use super::*;
@@ -187,7 +226,7 @@ mod test{
     #[test_case("2222222222","The key format is invalid")]
     
     fn test_generate_id(entry: &str, expected: &str){
-        let result = generate_id(entry);
+        let result = verifie_id(entry);
         match result {
             Err(err) => {
                 assert_eq!(err.to_string().as_str(), expected)

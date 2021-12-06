@@ -8,3 +8,10 @@ pub struct AuthResponse{
     pub request: String,
     pub result: bool
 }
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct GenerateResponse{
+    pub status: String,
+    pub request: String,
+    pub result: String
+}
