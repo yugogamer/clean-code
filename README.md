@@ -1,5 +1,5 @@
 # clean-code
-Ici on code proprement(on essaye)
+A very bad user verfication
 
 First you need to install rust.
 For this use : https://www.rust-lang.org/fr
@@ -26,7 +26,7 @@ For this use : https://www.rust-lang.org/fr
     cargo run --release
 ```
 
-# Test his api
+# Test This api
 
 For this open in your dev environement :
 http://127.0.0.1:8000/doc/index.html
