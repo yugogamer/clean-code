@@ -79,7 +79,7 @@ pub fn verifie_id(key: &str) -> Result<String, anyhow::Error>{
     Err(anyhow::anyhow!("The Key given is invalid"))
 }
 
-pub fn get_letter(key: &str) -> Result<char, anyhow::Error>{
+pub fn generate_id(key: &str) -> Result<char, anyhow::Error>{
     let err = key_gen_validation(key);
     
     match err {
@@ -195,14 +195,12 @@ mod test{
         assert_eq!(result.to_string().as_str(), expected);
     }
     
-    #[rustfmt::skip]
     #[test_case("","The key format is invalid")]
     #[test_case("15148A6565","The key format is invalid")]
     #[test_case("a154789623","The key format is invalid")]
     #[test_case("G487845617","")]
     #[test_case("A123456789","")]
     #[test_case("Z010000000","")]
-
     fn find_the_key(id: &str, expected: &str) -> Result<(), anyhow::Error>{
         let the_key = key_validation(id);
         println!("{}", &id);
@@ -217,14 +215,31 @@ mod test{
         Ok(())
     }
 
-    #[rustfmt::skip]
+    #[test_case("","The id format is invalid")]
+    #[test_case("12415148A6565","The id format is invalid")]
+    #[test_case("4789623","The id format is invalid")]
+    #[test_case("487845617","")]
+    #[test_case("123456789","")]
+    #[test_case("010000000","")]
+    fn test_find_id(id: &str, expected: &str) -> Result<(), anyhow::Error>{
+        let the_key = key_gen_validation(id);
+        println!("{}", &id);
+        match the_key {
+            Err(err) => {
+                assert_eq!(err.to_string().as_str(), expected);
+            }
+            Ok(_) => {
+                assert_eq!("", expected);
+            }
+        }
+        Ok(())
+    }
     
     #[test_case("L985412360","L")]
     #[test_case("Z010000000","Z")]
     #[test_case("A123456789","The Key given is invalid")]
     #[test_case("2222222222","The key format is invalid")]
-    
-    fn test_generate_id(entry: &str, expected: &str){
+    fn test_verifie_id(entry: &str, expected: &str){
         let result = verifie_id(entry);
         match result {
             Err(err) => {
@@ -234,5 +249,22 @@ mod test{
                 assert_eq!(key, expected)
             }
         }
+    }
+
+    #[test_case("985412360","L")]
+    #[test_case("010000000","Z")]
+    #[test_case("3456789","The id format is invalid")]
+    #[test_case("2222222","The id format is invalid")]
+    fn test_generate_id(entry : &str, expected: &str){
+        let result = generate_id(entry);
+        match result {
+            Err(err) => {
+                assert_eq!(err.to_string().as_str(), expected)
+            },
+            Ok(key) => {
+                assert_eq!(key.to_string(), expected)
+            }
+        }
+
     }
 }

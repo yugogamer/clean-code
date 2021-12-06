@@ -1,5 +1,5 @@
 use crate::entity::authentification::{AuthResponse, GenerateResponse};
-use crate::service::authentification::{verifie_id, get_letter};
+use crate::service::authentification::{verifie_id, generate_id};
 use rocket::serde::{json::Json};
 use rocket_okapi::{openapi, openapi_get_routes};
 
@@ -46,7 +46,7 @@ async fn create_id(key: &str) -> Json<GenerateResponse> {
         result: "".to_string(),
     };
 
-    let id = get_letter(&key);
+    let id = generate_id(&key);
 
     match id{
         Ok(result) => {
