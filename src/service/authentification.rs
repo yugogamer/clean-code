@@ -52,7 +52,6 @@ const MIN_KEY: char = 'Z';
 pub fn verifie_id(key: &str) -> Result<String, anyhow::Error>{
     let err = key_validation(key);
     let mut key = key;
-    let mut sum_string : String;
 
     match err {
             Ok(_) => {
