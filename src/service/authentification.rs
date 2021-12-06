@@ -48,16 +48,19 @@ const MIN_KEY: char = 'Z';
 /// assert_eq!(generate_id("j123456789"), "The key format is invalid".to_string())
 /// ```
 pub fn generate_id(key: &str) -> Result<String, anyhow::Error>{
-    let err = key_validation(&key);
+    let err = key_validation(key);
     let mut key = key;
     let mut sum_string : String;
 
-    if err.is_err(){
-        return Err(err.unwrap_err());
-    }
+    match err {
+            Ok(_) => {
 
+            }
+            Err(e) => return Err(e),
+        };
+    
     let mut sum = 16;
-    let letter = key.chars().nth(0).unwrap();
+    let letter = key.chars().next().unwrap();
     key = &key[1..key.len()];
     let mut char_array = Vec::new();
     let current_key: u32 = key.parse().unwrap();
@@ -85,18 +88,18 @@ pub fn generate_id(key: &str) -> Result<String, anyhow::Error>{
             }
         },
     }
-    return Err(anyhow::anyhow!("The Key given is invalid"));
+    Err(anyhow::anyhow!("The Key given is invalid"))
 }
 
 
-fn make_sum(char_array: &Vec<char>) -> u32{
+fn make_sum(char_array: &[char]) -> u32{
     let mut sum : u32 = 0;
     for number in char_array{
         if number.is_numeric(){
             sum += number.to_digit(10).unwrap();
         }
     }
-    return sum;
+    sum
 }
 
 /// A function using Regex expression to check if the key is valid.
@@ -134,8 +137,8 @@ fn key_validation(key: &str) -> Result<(), anyhow::Error>{
     }
     
     match res {
-        false => return Err(anyhow::anyhow!("The key format is invalid")),
-        true => return Ok(()),
+        false => Err(anyhow::anyhow!("The key format is invalid")),
+        true => Ok(()),
     }
 }
 
@@ -150,7 +153,7 @@ mod test{
     #[test_case("123456789","45".to_string())]
     fn test_make_sum(entry: &str, expected: String){
         let char_array = entry.chars().collect();
-        let result = make_sum(&char_array);
+        let result = make_sum(entry);
         assert_eq!(result.to_string(), expected);
     }
     
@@ -184,13 +187,13 @@ mod test{
     #[test_case("2222222222","The key format is invalid".to_string())]
     
     fn test_generate_id(entry: &str, expected: String){
-        let result = generate_id(&entry);
+        let result = generate_id(entry);
         match result {
             Err(err) => {
                 assert_eq!(err.to_string(), expected)
             },
             Ok(key) => {
-                assert_eq!(key.to_string(), expected)
+                assert_eq!(key, expected)
             }
         }
     }

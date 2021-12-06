@@ -6,7 +6,7 @@ use rocket_okapi::{openapi, openapi_get_routes};
 
 pub fn load_road(loader : rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
     let settings = rocket_okapi::settings::OpenApiSettings::new();
-    return loader.mount("/client/cle/verification", openapi_get_routes![settings: auth_user]);
+    loader.mount("/client/cle/verification", openapi_get_routes![settings: auth_user])
 }
 
 /// # Key to ID
@@ -24,7 +24,7 @@ async fn auth_user(key: &str) -> Json<AuthResponse> {
 
     match id{
         Ok(key) => {
-            response.request = String::from(key);
+            response.request = key;
             response.status = String::from("Succes");
             response.result = true;
         },
@@ -34,5 +34,5 @@ async fn auth_user(key: &str) -> Json<AuthResponse> {
         }
     }
 
-    return Json(response);
+    Json(response)
 }
